@@ -1,0 +1,26 @@
+# Ignore Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore environment and virtualenvs
+env/
+venv/
+ENV/
+.venv/
+
+# Ignore logs and other temporary files
+*.log
+*.tmp
+*.bak
+
+# Ignore dataset cache (optional if large files downloaded)
+.kaggle/
+.cache/
