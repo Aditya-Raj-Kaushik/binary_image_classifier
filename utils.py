@@ -1,34 +1,61 @@
-import os
-from PIL import Image
+from PIL import Image, ImageEnhance
 import numpy as np
+import os
+import random
 
-def load_images(data_path, image_size=(64, 64)):
-    X = []  # This will hold all the image data
-    y = []  # This will hold the corresponding labels (0 for Apple, 1 for Orange)
-    
-    # Telling the code what label to give to each folder
+def augment_image(img):
+    # Random horizontal flip
+    if random.random() > 0.5:
+        img = img.transpose(Image.FLIP_LEFT_RIGHT)
+
+    # Random rotation between -20 to 20 degrees
+    angle = random.uniform(-20, 20)
+    img = img.rotate(angle)
+
+    # Random brightness adjustment (between 0.8 to 1.2 times)
+    enhancer = ImageEnhance.Brightness(img)
+    img = enhancer.enhance(random.uniform(0.8, 1.2))
+
+    # Random zoom (crop and resize)
+    if random.random() > 0.5:
+        w, h = img.size
+        scale = random.uniform(0.8, 1.0)
+        new_w = int(w * scale)
+        new_h = int(h * scale)
+        left = random.randint(0, w - new_w)
+        top = random.randint(0, h - new_h)
+        img = img.crop((left, top, left + new_w, top + new_h))
+        img = img.resize((w, h))
+
+    return img
+
+def load_images(data_path, image_size=(64, 64), augment=True, augment_factor=4):
+    X = []
+    y = []
+
     class_map = {'Apple': 0, 'Orange': 1}
-    
-    # Go through each folder (Apple and Orange)
+
     for folder in ['Apple', 'Orange']:
-        folder_path = os.path.join(data_path, folder)  # Create the full path to the folder
-        label = class_map[folder]  # Get the number that represents the class (0 or 1)
-        
-        # Now, look at each image file inside that folder
+        folder_path = os.path.join(data_path, folder)
+        label = class_map[folder]
+
         for file in os.listdir(folder_path):
-            img_path = os.path.join(folder_path, file)  # Full path to the image file
+            img_path = os.path.join(folder_path, file)
             try:
-                # Open the image and convert it to grayscale (black & white)
                 img = Image.open(img_path).convert('L')
-                # Resize the image to 64x64 pixels so all images are the same size
                 img = img.resize(image_size)
-                # Turn the image into a 1D array and scale pixel values between 0 and 1
                 X.append(np.array(img).flatten() / 255.0)
-                # Save the label (either 0 or 1)
                 y.append(label)
+
+                # Apply augmentations
+                if augment:
+                    for _ in range(augment_factor):
+                        aug_img = augment_image(img)
+                        X.append(np.array(aug_img).flatten() / 255.0)
+                        y.append(label)
+
             except Exception as e:
-                # If the image can't be read or processed, skip it and print the reason
                 print(f"Skipping {img_path}: {e}")
 
-    # Convert our lists into proper NumPy arrays that the neural network can understand
     return np.array(X), np.array(y).reshape(-1, 1)
+
