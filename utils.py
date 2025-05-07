@@ -4,19 +4,19 @@ import os
 import random
 
 def augment_image(img):
-    # Random horizontal flip
+    # horizontal flip
     if random.random() > 0.5:
         img = img.transpose(Image.FLIP_LEFT_RIGHT)
 
-    # Random rotation between -20 to 20 degrees
+    # rotation between -20 to 20 degrees
     angle = random.uniform(-20, 20)
     img = img.rotate(angle)
 
-    # Random brightness adjustment (between 0.8 to 1.2 times)
+    # brightness adjustment 
     enhancer = ImageEnhance.Brightness(img)
     img = enhancer.enhance(random.uniform(0.8, 1.2))
 
-    # Random zoom (crop and resize)
+    # Random zoom 
     if random.random() > 0.5:
         w, h = img.size
         scale = random.uniform(0.8, 1.0)
