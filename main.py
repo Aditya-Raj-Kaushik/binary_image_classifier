@@ -7,7 +7,7 @@ from sklearn.metrics import classification_report, confusion_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.preprocessing import StandardScaler
-
+import pickle  
 # Downloading and locating dataset
 dataset_path = kagglehub.dataset_download("kipshidze/apple-vs-orange-binary-classification")
 data_path = os.path.join(dataset_path, "fruit-dataset")
@@ -22,7 +22,6 @@ print("Sample labels:", y[:5])
 scaler = StandardScaler()
 X = scaler.fit_transform(X)
 
-
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
 # Initializing model
@@ -33,7 +32,7 @@ model = MultiLayerNeuralNetwork(
     learning_rate=0.005
 )
 
-
+# Training
 model.train(X_train, y_train, epochs=500, early_stopping=True, patience=30)
 
 # Evaluation
@@ -52,3 +51,8 @@ plt.title("Confusion Matrix")
 plt.xlabel("Predicted")
 plt.ylabel("Actual")
 plt.show()
+
+#  Saving model and scaler as .pkl 
+with open('saved_model.pkl', 'wb') as f:
+    pickle.dump((model, scaler), f)
+print("\nModel and scaler saved as 'saved_model.pkl'")
