@@ -3,7 +3,7 @@ from PIL import Image
 import io
 import pickle
 
-# Load model and scaler
+
 with open("saved_model.pkl", "rb") as f:
     model, scaler = pickle.load(f)
 
@@ -16,10 +16,15 @@ def preprocess_image_bytes(image_bytes):
     scaled = scaler.transform([img_array])
     return scaled
 
-def predict_fruit(image_file):
-    # Preprocess the image bytes and scale
+def predict_fruit(image_file, threshold=0.8):
     input_data = preprocess_image_bytes(image_file)
     
-    # Predict the class (Apple or Orange)
-    prediction = model.predict(input_data)[0][0]
-    return class_map[int(prediction)]
+    prob = float(model.forward(input_data)[0][0])
+    
+    confidence = prob if prob >= 0.5 else 1 - prob
+    predicted_class = 1 if prob >= 0.5 else 0
+
+    if confidence >= threshold:
+        return class_map[predicted_class], confidence
+    else:
+        return "Unknown", confidence

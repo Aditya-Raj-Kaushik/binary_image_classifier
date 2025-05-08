@@ -1,7 +1,4 @@
-from fastapi import FastAPI, File, UploadFile
-from PIL import Image
-import numpy as np
-import io
+from fastapi import FastAPI, File, UploadFile, HTTPException
 from predict import predict_fruit
 
 app = FastAPI()
@@ -12,10 +9,14 @@ def read_root():
 
 @app.post("/predict")
 async def predict_image(file: UploadFile = File(...)):
-    # Read the uploaded file
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(status_code=400, detail="Invalid file type. Please upload an image.")
+
     contents = await file.read()
-    
-    # Predict the fruit based on the image
-    prediction = predict_fruit(contents)
-    
-    return {"prediction": prediction}
+
+    prediction, confidence = predict_fruit(contents)
+
+    return {
+        "prediction": str(prediction),
+        "confidence": round(float(confidence), 4)  
+    }
