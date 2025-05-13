@@ -1,11 +1,12 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 
 export default function HomePage() {
   const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [previewImg, setPreviewImg] = useState(null);
 
   const handleImageChange = (e) => {
     setImage(e.target.files[0]);
@@ -27,6 +28,7 @@ export default function HomePage() {
 
       const data = await response.json();
       setResult(data);
+      setPreviewImg(`data:image/png;base64,${data.image}`);
     } catch (error) {
       console.error("Upload failed:", error);
       setResult({ prediction: "Error", confidence: 0 });
@@ -37,7 +39,8 @@ export default function HomePage() {
   const handleDiscard = () => {
     setImage(null);
     setResult(null);
-    document.getElementById('image-input').value = null; 
+    setPreviewImg(null);
+    document.getElementById("image-input").value = null;
   };
 
   return (
@@ -72,8 +75,21 @@ export default function HomePage() {
 
       {result && (
         <div className="mt-4">
-          <p><strong>Prediction:</strong> {result.prediction}</p>
-          <p><strong>Confidence:</strong> {result.confidence}</p>
+          <p>
+            <strong>Prediction:</strong> {result.prediction}
+          </p>
+          <p>
+            <strong>Confidence:</strong> {result.confidence}
+          </p>
+        </div>
+      )}
+      {previewImg && (
+        <div className="mt-4">
+          <img
+            src={previewImg}
+            alt="Result"
+            className="w-full rounded shadow"
+          />
         </div>
       )}
     </div>
